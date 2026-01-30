@@ -32,7 +32,7 @@ def send_alert(message):
 def keyword_monitor():
     print("키워드 모니터링 시작...")
     while True:
-        new_content = ""
+        new_content = "포지션 공유 테스트"  # 테스트용
         
         if new_content:
             content_lower = new_content.lower()
@@ -51,7 +51,6 @@ def home():
 def health():
     return "OK", 200
 
-if __name__ == "__main__":
-    monitor_thread = threading.Thread(target=keyword_monitor, daemon=True)
-    monitor_thread.start()
-    app.run(host="0.0.0.0", port=10000)
+# 여기가 핵심! gunicorn이 앱 로드할 때 스레드 시작
+monitor_thread = threading.Thread(target=keyword_monitor, daemon=True)
+monitor_thread.start()
