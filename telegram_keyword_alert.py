@@ -18,7 +18,7 @@ API_HASH = "1d64697cb809b0b2a0898665ad351eec"
 SESSION_STR = "1BVtsOGYBu6TNvAU3Blhf6fM_YHGlwGVz_VLwqhXz7NffhLdgyd06LeJ1ppAFbtky-cmybTvq8L-q3p3z1BaWccKEgKrgE0PfyZSaoJn1KkLZiBP3eozujaUFsxpbrdUrDcLWPvc7EoLx6SN7a9xBGpev4QPYPiGUpKqDMJbD8aFFoGHWA-ndju3O947qAMIkA20o9eqqJGEP9rrAkgdcpY162EqYU5c2qVUS9RSzwPwsvATBgmJPa27fJmej887wbmp48AMYtxi56QvANQcxm1En6bnCkYkuR9809aJhagiH-kAfKGcNv1XPY-L5yFsOsoXNb5-Jw3EAGOEvUUrGWOc5mdxp1MQ="
 
 # 모니터링할 그룹
-GROUP_ID = -1003173316990
+GROUP_IDS = [-1003173316990, "@kyg0921"]
 
 # 키워드
 KEYWORDS = ["포지션 공유", "매도 하겠습니다"]
@@ -42,7 +42,7 @@ async def telethon_monitor():
     client = TelegramClient(StringSession(SESSION_STR), API_ID, API_HASH)
     await client.start()
     
-    @client.on(events.NewMessage(chats=GROUP_ID))
+    @client.on(events.NewMessage(chats=GROUP_IDS))
     async def handler(event):
         text = event.raw_text
         if text:
@@ -71,3 +71,4 @@ def health():
 # 텔레그램 모니터링 스레드 시작
 monitor_thread = threading.Thread(target=run_telethon, daemon=True)
 monitor_thread.start()
+
