@@ -17,8 +17,14 @@ API_ID = 31015393
 API_HASH = "1d64697cb809b0b2a0898665ad351eec"
 SESSION_STR = "1BVtsOGYBu6TNvAU3Blhf6fM_YHGlwGVz_VLwqhXz7NffhLdgyd06LeJ1ppAFbtky-cmybTvq8L-q3p3z1BaWccKEgKrgE0PfyZSaoJn1KkLZiBP3eozujaUFsxpbrdUrDcLWPvc7EoLx6SN7a9xBGpev4QPYPiGUpKqDMJbD8aFFoGHWA-ndju3O947qAMIkA20o9eqqJGEP9rrAkgdcpY162EqYU5c2qVUS9RSzwPwsvATBgmJPa27fJmej887wbmp48AMYtxi56QvANQcxm1En6bnCkYkuR9809aJhagiH-kAfKGcNv1XPY-L5yFsOsoXNb5-Jw3EAGOEvUUrGWOc5mdxp1MQ="
 
-GROUP_IDS = [-1003173316990, "kyg0921"]
-KEYWORDS = ["포지션 공유", "매도 하겠습니다"]
+# 채널별 키워드 설정
+CHANNEL_KEYWORDS = {
+    -1003173316990: ["포지션 공유", "매도 하겠습니다"],  # 크립토 정보방
+    "kyg0921": ["포지션 공유", "매도 하겠습니다"],       # kyg0921
+    -1002971986376: ["진입가", "손절가", "익절가"],      # 1% VIP룸
+}
+
+GROUP_IDS = list(CHANNEL_KEYWORDS.keys())
 
 def send_alert(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -28,7 +34,7 @@ def send_alert(message):
         "parse_mode": "Markdown",
         "disable_notification": False
     }
-    for attempt in range(3):  # 3번까지 재시도
+    for attempt in range(3):
         try:
             response = requests.post(url, data=payload, timeout=10)
             if response.status_code == 200:
@@ -40,7 +46,7 @@ def send_alert(message):
     return False
 
 async def telethon_monitor():
-    while True:  # 무한 재연결 루프
+    while True:
         try:
             print("텔레그램 연결 시도...")
             client = TelegramClient(StringSession(SESSION_STR), API_ID, API_HASH)
@@ -50,8 +56,11 @@ async def telethon_monitor():
             @client.on(events.NewMessage(chats=GROUP_IDS))
             async def handler(event):
                 text = event.raw_text
+                chat_id = event.chat_id
                 if text:
-                    matched = [kw for kw in KEYWORDS if kw in text]
+                    # 해당 채널의 키워드 가져오기
+                    keywords = CHANNEL_KEYWORDS.get(chat_id, [])
+                    matched = [kw for kw in keywords if kw in text]
                     if matched:
                         alert = f"🔥 키워드 감지: {', '.join(matched)}\n\n{text[:500]}"
                         send_alert(alert)
