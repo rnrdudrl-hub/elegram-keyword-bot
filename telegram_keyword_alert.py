@@ -10,7 +10,6 @@ import json
 
 app = Flask(__name__)
 
-# ────────────── 설정값 ──────────────
 BOT_TOKEN = "8440242757:AAG-qu-liy5KS4DmBP91T6__3sJNbLhmHpc"
 CHAT_ID = 6475435809
 
@@ -18,20 +17,17 @@ API_ID = 31015393
 API_HASH = "1d64697cb809b0b2a0898665ad351eec"
 SESSION_STR = "1BVtsOGYBu6TNvAU3Blhf6fM_YHGlwGVz_VLwqhXz7NffhLdgyd06LeJ1ppAFbtky-cmybTvq8L-q3p3z1BaWccKEgKrgE0PfyZSaoJn1KkLZiBP3eozujaUFsxpbrdUrDcLWPvc7EoLx6SN7a9xBGpev4QPYPiGUpKqDMJbD8aFFoGHWA-ndju3O947qAMIkA20o9eqqJGEP9rrAkgdcpY162EqYU5c2qVUS9RSzwPwsvATBgmJPa27fJmej887wbmp48AMYtxi56QvANQcxm1En6bnCkYkuR9809aJhagiH-kAfKGcNv1XPY-L5yFsOsoXNb5-Jw3EAGOEvUUrGWOc5mdxp1MQ="
 
-# 채널별 키워드 설정 (None = 모든 메시지)
 CHANNEL_KEYWORDS = {
-    -1003173316990: ["포지션 공유", "매도 하겠습니다"],  # 크립토 정보방
-    -1003868548636: ["포지션 공유", "매도 하겠습니다"],  # kyg0921
-    -1002971986376: ["진입가", "손절가", "익절가"],      # 1% VIP룸
-    -1003268148181: None,                              # 새 채널 (모든 메시지)
+    -1003173316990: ["포지션 공유", "매도 하겠습니다"],
+    -1003868548636: ["포지션 공유", "매도 하겠습니다"],
+    -1002971986376: ["진입가", "손절가", "익절가"],
+    -1003268148181: None,
 }
 
-# 확인 안 하면 반복 알림할 채널 (3분마다)
 REPEAT_CHANNELS = [-1003173316990, -1002971986376, -1003268148181]
 
 GROUP_IDS = list(CHANNEL_KEYWORDS.keys())
 
-# 미확인 알림 저장
 unconfirmed_alerts = {}
 alert_counter = 0
 
@@ -67,9 +63,8 @@ def send_alert_with_button(message, alert_id, need_confirm=True):
     return False
 
 def repeat_alerts():
-    """미확인 알림 3분마다 반복"""
     while True:
-        time.sleep(180)  # 3분 대기
+        time.sleep(180)
         for alert_id, data in list(unconfirmed_alerts.items()):
             print(f"미확인 알림 재전송: {alert_id}")
             send_alert_with_button(f"⚠️ 미확인 알림!\n\n{data['message']}", alert_id, True)
@@ -93,7 +88,6 @@ async def telethon_monitor():
                 if text:
                     keywords = CHANNEL_KEYWORDS.get(chat_id, [])
                     
-                    # None이면 모든 메시지, 아니면 키워드 체크
                     if keywords is None:
                         matched = ["모든 메시지"]
                     else:
@@ -104,7 +98,6 @@ async def telethon_monitor():
                         alert_id = alert_counter
                         message = f"🔥 키워드 감지: {', '.join(matched)}\n📢 채널: {chat_name}\n\n{text[:500]}"
                         
-                        # 반복 알림 채널인지 확인
                         if chat_id in REPEAT_CHANNELS:
                             unconfirmed_alerts[alert_id] = {"message": message}
                             send_alert_with_button(message, alert_id, True)
@@ -139,7 +132,6 @@ def health():
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    """확인 버튼 처리"""
     data = request.get_json()
     if data and 'callback_query' in data:
         callback = data['callback_query']
@@ -157,20 +149,8 @@ def webhook():
             )
     return "OK", 200
 
-# 스레드 시작
 monitor_thread = threading.Thread(target=run_telethon, daemon=True)
 monitor_thread.start()
 
 repeat_thread = threading.Thread(target=repeat_alerts, daemon=True)
 repeat_thread.start()
-```
-
-**Commit changes** 클릭
-
----
-
-## Webhook 설정 (한 번만)
-
-브라우저에서 이 URL 열기:
-```
-https://api.telegram.org/bot8440242757:AAG-qu-liy5KS4DmBP91T6__3sJNbLhmHpc/setWebhook?url=https://elegram-keyword-bot-t0pt.onrender.com/webhook
