@@ -20,7 +20,7 @@ SESSION_STR = "1BVtsOGYBu6TNvAU3Blhf6fM_YHGlwGVz_VLwqhXz7NffhLdgyd06LeJ1ppAFbtky
 # 채널별 키워드 설정
 CHANNEL_KEYWORDS = {
     -1003173316990: ["포지션 공유", "매도 하겠습니다"],  # 크립토 정보방
-    "kyg0921": ["포지션 공유", "매도 하겠습니다"],       # kyg0921
+    -1003868548636: ["포지션 공유", "매도 하겠습니다"],  # kyg0921
     -1002971986376: ["진입가", "손절가", "익절가"],      # 1% VIP룸
 }
 
@@ -57,14 +57,15 @@ async def telethon_monitor():
             async def handler(event):
                 text = event.raw_text
                 chat_id = event.chat_id
+                chat_name = event.chat.title if event.chat else "Unknown"
+                
                 if text:
-                    # 해당 채널의 키워드 가져오기
                     keywords = CHANNEL_KEYWORDS.get(chat_id, [])
                     matched = [kw for kw in keywords if kw in text]
                     if matched:
-                        alert = f"🔥 키워드 감지: {', '.join(matched)}\n\n{text[:500]}"
+                        alert = f"🔥 키워드 감지: {', '.join(matched)}\n📢 채널: {chat_name}\n\n{text[:500]}"
                         send_alert(alert)
-                        print(f"키워드 감지됨: {matched}")
+                        print(f"키워드 감지됨: {matched} (채널: {chat_name})")
             
             print(f"모니터링 중... 채널 수: {len(GROUP_IDS)}")
             await client.run_until_disconnected()
