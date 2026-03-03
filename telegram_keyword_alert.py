@@ -7,6 +7,8 @@ from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError
 import time
 import json
+from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 
@@ -165,6 +167,14 @@ async def telethon_monitor():
                         alert_counter += 1
                         alert_id = alert_counter
                         message = f"🔥 키워드 감지: {', '.join(matched)}\n📢 채널: {chat_name}\n\n{text[:500]}"
+
+                        # 한국 시간 확인 (23시~08시 사이면 알림 스킵)
+                        kst = pytz.timezone('Asia/Seoul')
+                        kst_now = datetime.now(kst)
+                        hour = kst_now.hour
+                        if 23 <= hour or hour < 8:
+                            print(f"야간 시간 알림 스킵 (KST {hour}시): {matched}")
+                            return
 
                         if chat_id in REPEAT_CHANNELS:
                             unconfirmed_alerts[alert_id] = {"message": message}
