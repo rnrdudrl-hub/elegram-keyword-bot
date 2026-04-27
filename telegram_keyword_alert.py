@@ -22,7 +22,7 @@ SESSION_STR = "1BVtsOGYBu6TNvAU3Blhf6fM_YHGlwGVz_VLwqhXz7NffhLdgyd06LeJ1ppAFbtky
 CHANNEL_KEYWORDS = {
     -1003173316990: ["포지션 공유", "매도 하겠습니다"],
     -1003868548636: ["포지션 공유", "매도 하겠습니다"],
-    -1002971986376: ["진입가", "손절가", "익절가"],
+    -1002971986376: ["더문", "더문이", "조커"],
     -1003268148181: None,
 }
 
