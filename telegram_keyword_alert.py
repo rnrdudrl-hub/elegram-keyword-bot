@@ -22,8 +22,12 @@ SESSION_STR = "1BVtsOGYBu6TNvAU3Blhf6fM_YHGlwGVz_VLwqhXz7NffhLdgyd06LeJ1ppAFbtky
 CHANNEL_KEYWORDS = {
     -1003173316990: ["포지션 공유", "매도 하겠습니다"],
     -1003868548636: ["포지션 공유", "매도 하겠습니다"],
-    -1002971986376: ["더문", "더문이", "조커"],
+    -1002971986376: ["진입가", "손절가", "익절가", "더문", "더문이", "조커"],
     -1003268148181: None,
+}
+
+EXCLUDE_KEYWORDS = {
+    -1002971986376: ["마스터입니다"]
 }
 
 REPEAT_CHANNELS = [-1003173316990, -1002971986376, -1003268148181]
@@ -164,17 +168,23 @@ async def telethon_monitor():
                         matched = [kw for kw in keywords if kw in text]
 
                     if matched:
-                        alert_counter += 1
-                        alert_id = alert_counter
-                        message = f"🔥 키워드 감지: {', '.join(matched)}\n📢 채널: {chat_name}\n\n{text[:500]}"
+                        # 제외 키워드 체크
+                        excludes = EXCLUDE_KEYWORDS.get(chat_id, [])
+                        if any(ex in text for ex in excludes):
+                            print(f"제외 키워드 감지, 알림 스킵: {text[:50]}")
+                            return
 
-                        # 한국 시간 확인 (23시~08시 사이면 알림 스킵)
+                        # 야간 시간 체크 (23시~08시)
                         kst = pytz.timezone('Asia/Seoul')
                         kst_now = datetime.now(kst)
                         hour = kst_now.hour
                         if 23 <= hour or hour < 8:
                             print(f"야간 시간 알림 스킵 (KST {hour}시): {matched}")
                             return
+
+                        alert_counter += 1
+                        alert_id = alert_counter
+                        message = f"🔥 키워드 감지: {', '.join(matched)}\n📢 채널: {chat_name}\n\n{text[:500]}"
 
                         if chat_id in REPEAT_CHANNELS:
                             unconfirmed_alerts[alert_id] = {"message": message}
